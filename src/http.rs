@@ -5,13 +5,26 @@ use reqwest::{Body, Method, StatusCode};
 use thiserror::Error;
 
 impl<'a> super::Client<'a> {
-    pub async fn upload_web_file<P: AsRef<Path>>(&self, path: P, upload: Upload) -> Result<(String, String), UploadError> {
+    pub async fn upload_web_file<P: AsRef<Path>>(
+        &self,
+        path: P,
+        upload: Upload,
+    ) -> Result<(String, String), UploadError> {
         let bytes = fs::read(path)?;
         self.upload_web(bytes, upload).await
     }
 
-    pub async fn upload_web<'b, B: Into<Body>>(&self, body: B, upload: Upload) -> Result<(String, String), UploadError> {
-        let mut request = self.http.request(Method::PUT, format!("{}{}/", upload.protocol.to_string(), self.base_uri))
+    pub async fn upload_web<'b, B: Into<Body>>(
+        &self,
+        body: B,
+        upload: Upload,
+    ) -> Result<(String, String), UploadError> {
+        let mut request = self
+            .http
+            .request(
+                Method::PUT,
+                format!("{}{}/", upload.protocol.to_string(), self.base_uri),
+            )
             .body(body);
 
         if let Some(filename) = upload.filename {
@@ -30,14 +43,11 @@ impl<'a> super::Client<'a> {
             request = request.query(&[("autodestroy", autodestroy as i32)]);
         }
 
-
         if let Some(shorturl) = upload.shorturl {
             request = request.query(&[("shorturl", shorturl as i32)]);
         }
 
-        let response = request
-            .send()
-            .await?;
+        let response = request.send().await?;
 
         let content = match response.status() {
             StatusCode::OK => response.text().await?,
@@ -51,8 +61,18 @@ impl<'a> super::Client<'a> {
 
         let mut lines = content.lines().skip(1);
 
-        let admin_url = lines.next().ok_or(UploadError::MalformedResponse(content.to_owned()))?.strip_suffix(" [Admin]").ok_or(UploadError::MalformedResponse(content.to_owned()))?.to_string();
-        let download_url = lines.next().ok_or(UploadError::MalformedResponse(content.to_owned()))?.strip_suffix(" [Download]").ok_or(UploadError::MalformedResponse(content.to_owned()))?.to_string();
+        let admin_url = lines
+            .next()
+            .ok_or(UploadError::MalformedResponse(content.to_owned()))?
+            .strip_suffix(" [Admin]")
+            .ok_or(UploadError::MalformedResponse(content.to_owned()))?
+            .to_string();
+        let download_url = lines
+            .next()
+            .ok_or(UploadError::MalformedResponse(content.to_owned()))?
+            .strip_suffix(" [Download]")
+            .ok_or(UploadError::MalformedResponse(content.to_owned()))?
+            .to_string();
 
         Ok((admin_url, download_url))
     }
@@ -80,9 +100,8 @@ pub struct Upload {
     randomizefn: Option<bool>,
     expire: Option<Duration>,
     autodestroy: Option<bool>,
-    shorturl: Option<bool>
+    shorturl: Option<bool>,
 }
-
 
 impl Upload {
     pub fn builder() -> UploadBuilder {

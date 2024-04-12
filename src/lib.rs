@@ -27,34 +27,41 @@ impl<'a> Client<'a> {
     }
 
     pub async fn get_hashsum(&self, file: &str) -> Result<String, GetHashsumError> {
-        let response = self.http.get(format!("https://{}/hashsum/{file}", self.base_uri))
+        let response = self
+            .http
+            .get(format!("https://{}/hashsum/{file}", self.base_uri))
             .send()
             .await?;
-            
+
         let content = match response.status() {
             StatusCode::OK => response.text().await?,
             StatusCode::NOT_FOUND => return Err(GetHashsumError::FileDoesNotExist),
-            status => return Err(GetHashsumError::UnknownStatusCode(status))
+            status => return Err(GetHashsumError::UnknownStatusCode(status)),
         };
 
         if !content.contains("(SHA1)") {
             return Err(GetHashsumError::MalformedResponse(content));
         }
 
-        let hashsum = content.strip_suffix(" (SHA1)").ok_or(GetHashsumError::MalformedResponse(content.to_owned()))?.to_string();
+        let hashsum = content
+            .strip_suffix(" (SHA1)")
+            .ok_or(GetHashsumError::MalformedResponse(content.to_owned()))?
+            .to_string();
 
         Ok(hashsum)
     }
 
     pub async fn delete_file(&self, file: &str) -> Result<(), DeleteFileError> {
-        let response = self.http.delete(format!("https://{}/a/{file}", self.base_uri))
+        let response = self
+            .http
+            .delete(format!("https://{}/a/{file}", self.base_uri))
             .send()
             .await?;
-            
+
         match response.status() {
             StatusCode::OK => Ok(()),
             StatusCode::NOT_FOUND => Err(DeleteFileError::FileDoesNotExist),
-            status => Err(DeleteFileError::UnknownStatusCode(status))
+            status => Err(DeleteFileError::UnknownStatusCode(status)),
         }
     }
 }
