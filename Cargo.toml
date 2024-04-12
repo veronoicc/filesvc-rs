@@ -2,6 +2,9 @@
 name = "filesvc-rs"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Wrapper for the https://files.vc file hosting service"
+repository = "https://github.com/veronoicc/filesvc-rs"
 
 [dependencies]
 reqwest = { version = "0.12.3", default-features = false, features = ["rustls-tls"]}
