@@ -1,14 +1,33 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+use std::{default, time::Duration};
+
+use derive_builder::Builder;
+
+#[derive(Default, Debug, Clone, Builder)]
+#[builder(setter(into))]
+pub struct Client {
+    http: reqwest::Client
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[derive(Default, Debug, Clone, Builder)]
+#[builder(setter(into))]
+pub struct Upload {
+    method: UploadMethod,
+    filename: Option<String>,
+    randomizefn: bool,
+    expire: Option<Duration>,
+    autodestroy: bool
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[derive(Default, Debug, Clone)]
+pub enum UploadMethod {
+    #[default]
+    Put,
+    Post
+}
+
+#[derive(Default, Debug, Clone)]
+pub enum UploadTransport {
+    #[default]
+    Put,
+    Post
 }
