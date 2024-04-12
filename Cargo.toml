@@ -1,15 +1,15 @@
 [package]
 name = "filesvc-rs"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 license = "MIT"
 description = "Wrapper for the https://files.vc file hosting service"
 repository = "https://github.com/veronoicc/filesvc-rs"
 
 [dependencies]
-reqwest = { version = "0.12.3", default-features = false, features = ["rustls-tls"]}
-derive_builder = "0.20.0"
-thiserror = "1.0.58"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"]}
+derive_builder = "0.20"
+thiserror = "1.0"
 
 [dev-dependencies]
 tokio = { version = "1.37.0", features = ["full"] }
